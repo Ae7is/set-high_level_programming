@@ -4,9 +4,8 @@ import sys
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import joinedload
-from sqlalchemy.orm import sessionmaker
-
-from relationship_state import State
+from relationship_state import Base, State
+from relationship_city import City
 
 
 if __name__ == "__main__":
@@ -17,11 +16,9 @@ if __name__ == "__main__":
         pool_pre_ping=True
     )
 
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
     states = (
-        session.query(State)
+        __import__("sqlalchemy").orm.sessionmaker(bind=engine)()
+        .query(State)
         .options(joinedload(State.cities))
         .order_by(State.id)
         .all()
@@ -29,7 +26,5 @@ if __name__ == "__main__":
 
     for state in states:
         print("{}: {}".format(state.id, state.name))
-        for city in state.cities:
+        for city in sorted(state.cities, key=lambda city: city.id):
             print("\t{}: {}".format(city.id, city.name))
-
-    session.close()
