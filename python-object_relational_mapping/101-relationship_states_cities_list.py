@@ -3,10 +3,10 @@
 import sys
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, joinedload
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import sessionmaker
 
-from relationship_state import Base, State
-from relationship_city import City
+from relationship_state import State
 
 
 if __name__ == "__main__":
@@ -20,13 +20,15 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    states = session.query(State).options(
-        joinedload(State.cities)
-    ).order_by(State.id).all()
+    states = (
+        session.query(State)
+        .options(joinedload(State.cities))
+        .order_by(State.id)
+        .all()
+    )
 
     for state in states:
         print("{}: {}".format(state.id, state.name))
-
         for city in state.cities:
             print("\t{}: {}".format(city.id, city.name))
 
